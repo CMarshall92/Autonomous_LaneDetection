@@ -8,14 +8,16 @@ def canny(image):
 
 def region_of_interest(image):
     height = image.shape[0]
-    triangle = np.array([(200, height), (1100, height), (550, 250)])
+    polygons = np.array([
+        [(200, height), (1100, height), (550, 250)]
+    ])
     mask = np.zeros_like(image)
-    cv2.fillPoly(mask, triangle, 255)
-    return mask
+    cv2.fillPoly(mask, polygons, 255)
+    return cv2.bitwise_and(image, mask)
 
 raw_image = cv2.imread('Road_Test.jpg')
 raw_copy = np.copy(raw_image)
 canny_final = canny(raw_copy)
-
-cv2.imshow('result', region_of_interest(canny_final))
+cropped_image = region_of_interest(canny_final)
+cv2.imshow('result', cropped_image)
 cv2.waitKey(0)
