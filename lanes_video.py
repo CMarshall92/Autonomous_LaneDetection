@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-raw_image = cv2.imread('./Content/Road_Test_Image.jpg')
+import time
 
 def canny(image):
     grayscale_image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
@@ -25,7 +25,8 @@ def region_of_interest(image):
     return cv2.bitwise_and(image, mask)
 
 def average_slope(image, lines):
-    left_lines, right_lines = [], []
+    left_lines = []
+    right_lines = []
     for line in lines:
         x1, y1, x2, y2 = line.reshape(4)
         paramaters = np.polyfit((x1, x2), (y1, y2), 1)
@@ -47,12 +48,13 @@ def display_lines(image, lines):
             cv2.line(line_image, (x1, y1), (x2, y2), (255, 0, 0), 10)
     return line_image
 
-raw_copy = np.copy(raw_image)
-cropped_image = region_of_interest(canny(raw_copy))
-lines = cv2.HoughLinesP(cropped_image, 2, np.pi/180, 100, np.array([]), minLineLength=40, maxLineGap=5)
-average_lines = average_slope(raw_copy, lines)
-combine_image = cv2.addWeighted(raw_copy, 0.8, display_lines(raw_copy, average_lines), 1, 1)
-
-# Dsiplay on screen
-cv2.imshow('result', combine_image)
-cv2.waitKey(0)
+cap = cv2.VideoCapture('./Content/Road_Test_Video.mp4')
+time.sleep(10)
+while(cap.isOpened()):
+    _, frame = cap.read()
+    cropped_image = region_of_interest(canny(frame))
+    lines = cv2.HoughLinesP(cropped_image, 2, np.pi/180, 100, np.array([]), minLineLength=40, maxLineGap=5)
+    average_lines = average_slope(frame, lines)
+    combine_image = cv2.addWeighted(frame, 0.8, display_lines(frame, average_lines), 1, 1)
+    cv2.imshow('result', combine_image)
+    cv2.waitKey(1)
