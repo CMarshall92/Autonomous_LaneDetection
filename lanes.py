@@ -1,15 +1,21 @@
 import cv2
 import numpy as np
 
-# Loads in the images using the cv2 lib
-image = cv2.imread('Road_Test.jpg')
+def canny(image):
+    grayscale_image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+    blur = cv2.GaussianBlur(grayscale_image, (5, 5), 0)
+    return cv2.Canny(blur, 50, 150)
 
-# Creates a copy of the image to be later converted to grayscale
-lane_image = np.copy(image)
-gray = cv2.cvtColor(lane_image, cv2.COLOR_RGB2GRAY)
+def region_of_interest(image):
+    height = image.shape[0]
+    triangle = np.array([(200, height), (1100, height), (550, 250)])
+    mask = np.zeros_like(image)
+    cv2.fillPoly(mask, triangle, 255)
+    return mask
 
-# Displays the image onscreen in a new window titled result
-cv2.imshow('result', gray)
+raw_image = cv2.imread('Road_Test.jpg')
+raw_copy = np.copy(raw_image)
+canny_final = canny(raw_copy)
+
+cv2.imshow('result', region_of_interest(canny_final))
 cv2.waitKey(0)
-
-
